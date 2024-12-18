@@ -1,0 +1,13 @@
+# requirements.txt
+
+# HTTP requests library for interacting with APIs
+requests>=2.26.0
+
+# dotenv library for loading environment variables
+python-dotenv>=1.0.0
+
+# Pillow library for image processing
+pillow>=10.0.0
+
+# PyJWT library for decoding JSON Web Tokens
+pyjwt>=2.8.0
