@@ -1,5 +1,6 @@
 import requests
 import jwt
+from jwt.exceptions import DecodeError
 from datetime import datetime, timezone
 from urllib.parse import urlencode
 from dotenv import load_dotenv, set_key
@@ -102,19 +103,20 @@ class SensorHandler:
             else:
                 raise Exception(f"Unexpected error during token refresh: {response.json()}")
 
-    def is_token_expired(self, token):
-        """Check if the access token is expired."""
-        try:
-            decoded_token = jwt.decode(token, options={"verify_signature": False})
-            exp_timestamp = decoded_token.get("exp")
-            if not exp_timestamp:
-                print("No expiration field in token.")
-                return True  # Assume expired if no exp field
-            now = datetime.now(timezone.utc).timestamp()
-            return now >= exp_timestamp
-        except jwt.DecodeError:
-            print("Invalid token format.")
-            return True  # Treat invalid token as expired
+    # def is_token_expired(self, token):
+    #     """Check if the access token is expired."""
+    #     try:
+    #         decoded_token = jwt.decode(token, options={"verify_signature": False})
+    #         exp_timestamp = decoded_token.get("exp")
+    #         if not exp_timestamp:
+    #             print("No expiration field in token.")
+    #             return True  # Assume expired if no exp field
+    #         now = datetime.now(timezone.utc).timestamp()
+    #         return now >= exp_timestamp
+    #     except jwt.DecodeError:
+    #         print("Invalid token format.")
+    #         return True  # Treat invalid token as expired
+        
 
     def reauthenticate(self):
         """Guide the user to reauthorize the application."""
@@ -125,7 +127,7 @@ class SensorHandler:
 
     def read_sensor_data(self):
         """Read data from the sensor, refreshing the token if necessary."""
-        if not self.access_token or self.is_token_expired(self.access_token):
+        if not self.access_token:
             print("Access token expired or unavailable, attempting to refresh...")
             self.refresh_access_token()
 
@@ -136,7 +138,7 @@ class SensorHandler:
         }
         response = requests.get(url, headers=headers)
 
-        if response.status_code == 401:  # Token expired or invalid
+        if response.status_code == 401 or response.status_code == 403:  # Token expired or invalid
             print("Access token expired or invalid, refreshing token...")
             self.refresh_access_token()
             headers["Authorization"] = f"Bearer {self.access_token}"

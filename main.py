@@ -71,7 +71,7 @@ if __name__ == "__main__":
     )
 
     # Capture data
-    # image_data = camera_handler.capture_image()
+    image_data = camera_handler.capture_image()
     sensor_data = sensor_handler.read_sensor_data()
 
     # Add metadata
@@ -80,8 +80,8 @@ if __name__ == "__main__":
 
     # Format data
     formatter = DataFormatter()
-    # formatted_data = formatter.format_data(image_data, sensor_data, metadata)
+    formatted_data = formatter.format_data(image_data, sensor_data, metadata)
 
     # Output for verification
     print("Formatted Data:")
-    # print(formatted_data)
+    print(formatted_data)

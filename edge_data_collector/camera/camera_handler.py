@@ -21,18 +21,20 @@ class CameraHandler:
             str: Path to the saved image (compressed or raw).
         """
         print(f"Capturing image from camera {self.camera_id}")
-        # Simulate image capture by saving a placeholder file
-        timestamp = int(time.time())
-        raw_image_path = os.path.join(self.image_folder, f"raw_image_{timestamp}.jpg")
-        compressed_image_path = os.path.join(self.image_folder, f"compressed_image_{timestamp}.jpg")
 
-        # Create a placeholder raw image (for simulation purposes)
-        with open(raw_image_path, "wb") as f:
-            f.write(os.urandom(1024 * 1024))  # Write 1MB of random data to simulate an image
+
+        # Simulate image capture
+        raw_image_path = self.simulate_image_capture()
+
 
         print(f"Raw image saved to {raw_image_path}")
 
         if compress:
+
+            # Define the compressed image path
+            compressed_image_path = os.path.join(self.image_folder, f"compressed_{os.path.basename(raw_image_path)}")
+
+
             # Compress the raw image
             compress_image(raw_image_path, compressed_image_path, quality=75)
 
@@ -43,6 +45,25 @@ class CameraHandler:
             return compressed_image_path
         else:
             return raw_image_path
+        
+
+    # Simulate image Capturing
+    def simulate_image_capture(self):
+        """
+        Simulate capturing an image by creating a placeholder file.
+
+        Returns:
+            str: Path to the simulated raw image.
+        """
+        timestamp = int(time.time())
+        raw_image_path = os.path.join(self.image_folder, f"raw_image_{timestamp}.jpg")
+
+        # Create a placeholder raw image (for simulation purposes)
+        with open(raw_image_path, "wb") as f:
+            f.write(os.urandom(1024 * 1024))  # Write 1MB of random data to simulate an image
+
+        print(f"Raw image simulated and saved to {raw_image_path}")
+        return raw_image_path
 
 
 
