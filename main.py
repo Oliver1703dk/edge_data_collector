@@ -4,7 +4,7 @@ import requests
 from edge_data_collector.camera.camera_handler import CameraHandler
 from edge_data_collector.sensors.sensor_handler import SensorHandler
 from edge_data_collector.metadata.metadata_handler import MetadataHandler
-from edge_data_collector.formatter.data_formatter import DataFormatter
+from edge_data_collector.formatter.data_formatter import *
 
 
 
@@ -79,8 +79,8 @@ if __name__ == "__main__":
     metadata = metadata_handler.add_metadata({}, camera_id="camera_01")
 
     # Format data
-    formatter = DataFormatter()
-    formatted_data = formatter.format_data(image_data, sensor_data, metadata)
+    # formatter = DataFormatter()
+    formatted_data = format_data(image_data, sensor_data, metadata)
 
     # Output for verification
     print("Formatted Data:")
