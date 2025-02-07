@@ -1,7 +1,15 @@
 import os
 import time  # For generating timestamps for image simulation
+from dotenv import load_dotenv
+try:
+    from picamera import PiCamera
+except ImportError:
+    from edge_data_collector.camera.mock.pi_camera import PiCamera
 from .utils import compress_image
 # from edge_data_collector.camera.utils import compress_image
+
+
+load_dotenv()
 
 
 class CameraHandler:
@@ -9,6 +17,16 @@ class CameraHandler:
         self.camera_id = camera_id
         self.image_folder = image_folder
         os.makedirs(self.image_folder, exist_ok=True)  # Ensure the image folder exists
+        self.simulate_image_creation = os.getenv("SIMULATE_IMAGE_CREATION", "False").lower() == "true"
+
+
+
+        if not self.simulate_image_creation:
+            self.camera = PiCamera()
+            self.camera.resolution = (1920, 1080)
+        else:
+            self.camera = None  # No real camera if simulating
+
 
     def capture_image(self, compress=False):
         """
@@ -23,8 +41,17 @@ class CameraHandler:
         print(f"Capturing image from camera {self.camera_id}")
 
 
-        # Simulate image capture
-        raw_image_path = self.simulate_image_capture()
+        if(self.simulate_image_creation):
+            # # Simulate image capture
+            raw_image_path = self.simulate_image_capture()
+
+        else:
+            # Real image capture 
+            raw_image_path = self.capture_image_using_camera()
+
+        if not raw_image_path:
+            print("Failed to capture image.")
+            return None
 
 
         print(f"Raw image saved to {raw_image_path}")
@@ -65,6 +92,35 @@ class CameraHandler:
         print(f"Raw image simulated and saved to {raw_image_path}")
         return raw_image_path
 
+
+
+    def capture_image_using_camera(self):
+        """
+        Capture an image using the Raspberry Pi camera.
+
+        Returns:
+            str: Path to the captured raw image.
+        """
+        timestamp = int(time.time())
+        raw_image_path = os.path.join(self.image_folder, f"raw_image_{timestamp}.jpg")
+
+        # Capture the image and save it to the specified path
+        try:
+            self.camera.capture(raw_image_path)
+        except Exception as e:
+            print(f"Failed to capture image: {e}")
+            return None
+
+        print(f"Image captured using camera and saved to {raw_image_path}")
+        return raw_image_path
+    
+
+    def close_camera(self):
+        """
+        Cleanly close the camera when done.
+        """
+        self.camera.close()
+        print("Camera closed.")
 
 
 
