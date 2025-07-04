@@ -35,3 +35,8 @@ class PiCamera:
             raise RuntimeError("Cannot set resolution on a closed Mock PiCamera.")
         self.resolution = (width, height)
         print(f"Mock PiCamera resolution set to: {self.resolution}")
+
+    # Compatibility with Picamera2 API
+    def capture_file(self, output_path):
+        """Capture an image to a file (Picamera2-compatible)."""
+        self.capture(output_path)
