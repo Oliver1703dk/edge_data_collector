@@ -7,5 +7,6 @@ PyJWT==2.10.1
 python-dotenv==1.0.1
 requests==2.32.3
 urllib3==2.2.3
-# Add picamera only for Raspberry Pi
-picamera ; platform_machine == "armv7l"
+# Camera library for Raspberry Pi
+picamera2 ; platform_machine == "armv7l" or platform_machine == "aarch64"
+

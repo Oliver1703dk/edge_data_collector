@@ -2,9 +2,14 @@ import os
 import time  # For generating timestamps for image simulation
 from dotenv import load_dotenv
 try:
-    from picamera import PiCamera
-except ImportError:
-    from edge_data_collector.camera.mock.pi_camera import PiCamera
+    from picamera2 import Picamera2
+    PICAMERA2_AVAILABLE = True
+except ImportError:  # Fall back to legacy PiCamera or mock camera
+    PICAMERA2_AVAILABLE = False
+    try:
+        from picamera import PiCamera
+    except ImportError:
+        from edge_data_collector.camera.mock.pi_camera import PiCamera
 from .utils import compress_image
 # from edge_data_collector.camera.utils import compress_image
 
@@ -22,8 +27,13 @@ class CameraHandler:
 
 
         if not self.simulate_image_creation:
-            self.camera = PiCamera()
-            self.camera.resolution = (1920, 1080)
+            if PICAMERA2_AVAILABLE:
+                self.camera = Picamera2()
+                self.camera.configure(self.camera.create_still_configuration(main={"size": (1920, 1080)}))
+                self.camera.start()
+            else:
+                self.camera = PiCamera()
+                self.camera.resolution = (1920, 1080)
         else:
             self.camera = None  # No real camera if simulating
 
@@ -106,7 +116,10 @@ class CameraHandler:
 
         # Capture the image and save it to the specified path
         try:
-            self.camera.capture(raw_image_path)
+            if PICAMERA2_AVAILABLE:
+                self.camera.capture_file(raw_image_path)
+            else:
+                self.camera.capture(raw_image_path)
         except Exception as e:
             print(f"Failed to capture image: {e}")
             return None
@@ -119,7 +132,12 @@ class CameraHandler:
         """
         Cleanly close the camera when done.
         """
-        self.camera.close()
+        if not self.simulate_image_creation and self.camera:
+            if PICAMERA2_AVAILABLE:
+                self.camera.stop()
+                self.camera.close()
+            else:
+                self.camera.close()
         print("Camera closed.")
 
 
