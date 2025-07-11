@@ -40,6 +40,7 @@ if __name__ == "__main__":
     mqtt_port = int(os.getenv("MQTT_PORT", 1883))
     mqtt_topic = os.getenv("MQTT_TOPIC", "sensor/data")
     simulate_image_creation = os.getenv("SIMULATE_IMAGE_CREATION", "False").lower() == "true"
+    simulate_sensor_data = os.getenv("SIMULATE_SENSOR_DATA", "False").lower() == "true"
 
 
 
@@ -63,7 +64,8 @@ if __name__ == "__main__":
         client_secret=client_secret,
         redirect_uri="https://example.com",
         access_token=access_token,
-        refresh_token=refresh_token
+        refresh_token=refresh_token,
+        simulate_sensor=simulate_sensor_data,
     )
     metadata_handler = MetadataHandler()
 

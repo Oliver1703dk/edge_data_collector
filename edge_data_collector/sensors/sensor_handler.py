@@ -7,8 +7,11 @@ from dotenv import load_dotenv, set_key
 import os
 
 
+import random
+
+
 class SensorHandler:
-    def __init__(self, sensor_id, client_id, client_secret, redirect_uri, access_token=None, refresh_token=None):
+    def __init__(self, sensor_id, client_id, client_secret, redirect_uri, access_token=None, refresh_token=None, simulate_sensor=False):
         # load_dotenv()  # Load environment variables from .env
         self.sensor_id = sensor_id
         self.client_id = client_id
@@ -16,6 +19,7 @@ class SensorHandler:
         self.redirect_uri = redirect_uri
         self.access_token = access_token 
         self.refresh_token = refresh_token
+        self.simulate_sensor = simulate_sensor or os.getenv("SIMULATE_SENSOR_DATA", "False").lower() == "true"
         # self.access_token = os.getenv("NETATMO_ACCESS_TOKEN")
         # self.refresh_token = os.getenv("NETATMO_REFRESH_TOKEN")
 
@@ -127,6 +131,10 @@ class SensorHandler:
 
     def read_sensor_data(self):
         """Read data from the sensor, refreshing the token if necessary."""
+        if self.simulate_sensor:
+            print(f"Simulating data for sensor {self.sensor_id}...")
+            return self._generate_fake_data()
+
         if not self.access_token:
             print("Access token expired or unavailable, attempting to refresh...")
             self.refresh_access_token()
@@ -159,3 +167,11 @@ class SensorHandler:
                 return None
         else:
             raise Exception(f"Failed to fetch sensor data: {response.status_code} {response.json()}")
+
+    def _generate_fake_data(self):
+        """Generate simulated sensor readings."""
+        return {
+            "temperature": round(random.uniform(15, 30), 2),
+            "humidity": round(random.uniform(30, 90), 2),
+            "pressure": round(random.uniform(950, 1050), 2),
+        }
