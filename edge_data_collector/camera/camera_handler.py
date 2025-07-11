@@ -22,7 +22,7 @@ class CameraHandler:
         self.camera_id = camera_id
         self.image_folder = image_folder
         os.makedirs(self.image_folder, exist_ok=True)  # Ensure the image folder exists
-        self.simulate_image_creation = os.getenv("SIMULATE_IMAGE_CREATION", "False").lower() == "true"
+        self.simulate_image_creation = os.getenv("SIMULATE_IMAGE_CREATION", "false").lower() == "true"
 
 
 

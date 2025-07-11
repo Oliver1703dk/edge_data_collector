@@ -16,12 +16,30 @@ import os
 
 
 
+# def reload_env():
+#     """Force reload the .env file and clear cached variables."""
+#     for key in list(os.environ.keys()):
+#         if key.startswith("NETATMO_"):  # Adjust prefix if needed
+#             del os.environ[key]
+#     load_dotenv()  # Reload the .env file
 def reload_env():
     """Force reload the .env file and clear cached variables."""
-    for key in list(os.environ.keys()):
-        if key.startswith("NETATMO_"):  # Adjust prefix if needed
-            del os.environ[key]
-    load_dotenv()  # Reload the .env file
+    # List all keys used in your project to clear them explicitly
+    keys_to_clear = [
+        "NETATMO_CLIENT_ID", "NETATMO_CLIENT_SECRET", "NETATMO_USERNAME", "NETATMO_PASSWORD",
+        "NETATMO_SENSOR_ID_INDOOR", "NETATMO_SENSOR_ID_OUTDOOR", "NETATMO_ACCESS_TOKEN", "NETATMO_REFRESH_TOKEN",
+        "USE_MQTT", "MQTT_BROKER", "MQTT_PORT", "MQTT_TOPIC",
+        "SIMULATE_IMAGE_CREATION", "SIMULATE_SENSOR_DATA"
+    ]
+    for key in keys_to_clear:
+        os.environ.pop(key, None)  # Safer than del, avoids KeyError if missing
+    
+    # Load with override=True to ensure .env values take precedence
+    # Optionally specify path if .env isn't in cwd: dotenv_path=os.path.join(os.path.dirname(__file__), '.env')
+    loaded = load_dotenv(override=True)  # Add dotenv_path=... if needed
+    print(f"Dotenv loaded successfully: {loaded}")
+    if not loaded:
+        print("Warning: .env file not found! Check path and working directory.")
 
 
 
@@ -35,13 +53,12 @@ if __name__ == "__main__":
 
 
     # Load configurations
-    use_mqtt = os.getenv("USE_MQTT", "False").lower() == "true"
+    use_mqtt = os.getenv("USE_MQTT", "false").lower() == "true"
     mqtt_broker = os.getenv("MQTT_BROKER", "localhost")
     mqtt_port = int(os.getenv("MQTT_PORT", 1883))
     mqtt_topic = os.getenv("MQTT_TOPIC", "sensor/data")
-    simulate_image_creation = os.getenv("SIMULATE_IMAGE_CREATION", "False").lower() == "true"
-    simulate_sensor_data = os.getenv("SIMULATE_SENSOR_DATA", "False").lower() == "true"
-
+    simulate_image_creation = os.getenv("SIMULATE_IMAGE_CREATION", "false").lower() == "true"
+    simulate_sensor_data = os.getenv("SIMULATE_SENSOR_DATA", "false").lower() == "true"
 
 
     # Retrieve sensitive credentials from environment variables
