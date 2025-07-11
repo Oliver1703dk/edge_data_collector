@@ -1,6 +1,6 @@
 import os
 import time  # For generating timestamps for image simulation
-from dotenv import load_dotenv
+import config
 try:
     from picamera2 import Picamera2
     PICAMERA2_AVAILABLE = True
@@ -9,12 +9,9 @@ except ImportError:  # Fall back to legacy PiCamera or mock camera
     try:
         from picamera import PiCamera
     except ImportError:
-        from edge_data_collector.camera.mock.pi_camera import PiCamera
+from edge_data_collector.camera.mock.pi_camera import PiCamera
 from .utils import compress_image
 # from edge_data_collector.camera.utils import compress_image
-
-
-load_dotenv()
 
 
 class CameraHandler:
@@ -22,7 +19,7 @@ class CameraHandler:
         self.camera_id = camera_id
         self.image_folder = image_folder
         os.makedirs(self.image_folder, exist_ok=True)  # Ensure the image folder exists
-        self.simulate_image_creation = os.getenv("SIMULATE_IMAGE_CREATION", "false").lower() == "true"
+        self.simulate_image_creation = config.SIMULATE_IMAGE_CREATION
 
 
 

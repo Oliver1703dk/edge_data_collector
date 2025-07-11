@@ -3,8 +3,9 @@ import jwt
 from jwt.exceptions import DecodeError
 from datetime import datetime, timezone
 from urllib.parse import urlencode
-from dotenv import load_dotenv, set_key
+from dotenv import set_key
 import os
+import config
 
 
 import random
@@ -12,14 +13,13 @@ import random
 
 class SensorHandler:
     def __init__(self, sensor_id, client_id, client_secret, redirect_uri, access_token=None, refresh_token=None, simulate_sensor=False):
-        # load_dotenv()  # Load environment variables from .env
         self.sensor_id = sensor_id
         self.client_id = client_id
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
-        self.access_token = access_token 
+        self.access_token = access_token
         self.refresh_token = refresh_token
-        self.simulate_sensor = simulate_sensor or os.getenv("SIMULATE_SENSOR_DATA", "False").lower() == "true"
+        self.simulate_sensor = simulate_sensor or config.SIMULATE_SENSOR_DATA
         # self.access_token = os.getenv("NETATMO_ACCESS_TOKEN")
         # self.refresh_token = os.getenv("NETATMO_REFRESH_TOKEN")
 
