@@ -5,8 +5,15 @@ flags are defined here, while Netatmo credentials remain in the ``.env`` file
 and are loaded by the main application.
 """
 
+import os
+
+
 USE_MQTT = True
-MQTT_BROKER = "localhost"
+# If .env file has MQTT_BROKER use that, otherwise use localhost
+if os.getenv("MQTT_BROKER"):
+    MQTT_BROKER = os.getenv("MQTT_BROKER")
+else:
+    MQTT_BROKER = "localhost"
 MQTT_PORT = 1883
 MQTT_TOPIC = "sensor/data"
 
