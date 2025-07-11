@@ -9,7 +9,7 @@ except ImportError:  # Fall back to legacy PiCamera or mock camera
     try:
         from picamera import PiCamera
     except ImportError:
-from edge_data_collector.camera.mock.pi_camera import PiCamera
+        from edge_data_collector.camera.mock.pi_camera import PiCamera
 from .utils import compress_image
 # from edge_data_collector.camera.utils import compress_image
 

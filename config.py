@@ -6,9 +6,9 @@ and are loaded by the main application.
 """
 
 USE_MQTT = True
-MQTT_BROKER = "192.168.10.1"
+MQTT_BROKER = "localhost"
 MQTT_PORT = 1883
 MQTT_TOPIC = "sensor/data"
 
-SIMULATE_IMAGE_CREATION = False
-SIMULATE_SENSOR_DATA = False
+SIMULATE_IMAGE_CREATION = True
+SIMULATE_SENSOR_DATA = True
