@@ -1,17 +1,18 @@
 
 import os
-
 import requests
+from dotenv import load_dotenv
 
 
 if __name__ == "__main__":
+    load_dotenv()
 
-    # Retrieve sensitive credentials from environment variables
+    # Retrieve credentials from environment variables
     client_id = os.getenv("NETATMO_CLIENT_ID")
     client_secret = os.getenv("NETATMO_CLIENT_SECRET")
     username = os.getenv("NETATMO_USERNAME")
     password = os.getenv("NETATMO_PASSWORD")
-    sensor_id = os.getenv("NETATMO_SENSOR_ID")
+    sensor_id = os.getenv("NETATMO_SENSOR_ID_INDOOR")
     access_token = os.getenv("NETATMO_ACCESS_TOKEN")
 
     url = "https://api.netatmo.com/api/getstationsdata"
