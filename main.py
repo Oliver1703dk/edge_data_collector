@@ -89,7 +89,7 @@ if __name__ == "__main__":
                 # Publish data via MQTT
                 mqtt_handler.publish(formatted_data)
                 print("Published Data:", formatted_data)
-                time.sleep(1)
+                time.sleep(5)
 
         except KeyboardInterrupt:
             print("Stopping data sender...")
