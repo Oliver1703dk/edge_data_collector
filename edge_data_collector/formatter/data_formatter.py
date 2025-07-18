@@ -33,8 +33,7 @@ def encode_image(image_path):
     import base64
     print(image_path)
 
-    #TODO: Use image_path instead of placeholder
-    with Image.open("edge_data_collector/camera/images/test_image.jpeg") as img:
+    with Image.open(image_path) as img:
         buffered = BytesIO()
         img = img.convert('RGB')
         img.save(buffered, format="JPEG")
