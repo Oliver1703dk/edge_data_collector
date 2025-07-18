@@ -45,7 +45,6 @@ class CameraHandler:
         Returns:
             str: Path to the saved image (compressed or raw).
         """
-        print(f"Capturing image from camera {self.camera_id}")
 
 
         if(self.simulate_image_creation):
@@ -110,6 +109,8 @@ class CameraHandler:
         """
         timestamp = int(time.time())
         raw_image_path = os.path.join(self.image_folder, f"raw_image_{timestamp}.jpg")
+        print(f"Capturing image from camera {self.camera_id}")
+
 
         # Capture the image and save it to the specified path
         try:
