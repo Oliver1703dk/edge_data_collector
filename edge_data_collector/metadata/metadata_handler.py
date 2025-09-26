@@ -8,9 +8,12 @@ class MetadataHandler:
         metadata = {
             "timestamp": datetime.now().isoformat(),
             "location": "50.8503,4.3517",  # Example GPS coordinates
-            "camera_id": camera_id
+            "camera_id": camera_id,
+            "motion": "slow",
+            "resource_constrained": False,
         }
-        return {**data, **metadata}
-
+        if data:
+            metadata.update(data)
+        return metadata
 
 

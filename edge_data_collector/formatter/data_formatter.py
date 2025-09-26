@@ -1,5 +1,31 @@
 
 
+_ALLOWED_MOTION_STATES = {"fast", "slow", "stop"}
+_TRUTHY_STRINGS = {"true", "1", "yes", "on"}
+_FALSY_STRINGS = {"false", "0", "no", "off"}
+
+
+def _normalize_motion_hint(value):
+    if isinstance(value, str):
+        candidate = value.strip().lower()
+        if candidate in _ALLOWED_MOTION_STATES:
+            return candidate
+    return "slow"
+
+
+def _normalize_resource_flag(value):
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        candidate = value.strip().lower()
+        if candidate in _TRUTHY_STRINGS:
+            return True
+        if candidate in _FALSY_STRINGS:
+            return False
+        return False
+    if isinstance(value, (int, float)):
+        return value != 0
+    return False
 
 
 def format_data(image_data, sensor_data, metadata):
@@ -12,11 +38,17 @@ def format_data(image_data, sensor_data, metadata):
     Returns:
         dict: Formatted data payload with Base64-encoded image.
     """
+    metadata_payload = dict(metadata or {})
+    motion_hint = metadata_payload.get("motion")
+    resource_flag = metadata_payload.get("resource_constrained")
+    metadata_payload["motion"] = _normalize_motion_hint(motion_hint)
+    metadata_payload["resource_constrained"] = _normalize_resource_flag(resource_flag)
+
     encoded_image_data = encode_image(image_data)
     return {
         "image_data": encoded_image_data,
         "sensor_data": sensor_data,
-        "metadata": metadata
+        "metadata": metadata_payload
     }
     
 
@@ -39,5 +71,4 @@ def encode_image(image_path):
         img.save(buffered, format="JPEG")
         return base64.b64encode(buffered.getvalue()).decode()
     
-
 

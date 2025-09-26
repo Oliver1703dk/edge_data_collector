@@ -68,7 +68,8 @@ if __name__ == "__main__":
                 metadata = metadata_handler.add_metadata({}, camera_id="camera_01")
                 formatted_data = format_data(image_data, sensor_data, metadata)
                 mqtt_handler.publish(formatted_data)
-                print("Published Data:", formatted_data)
+                print('Data Published')
+                # print("Published Data:", formatted_data)
                 time.sleep(5)
         except KeyboardInterrupt:
             print("Stopping data sender...")
@@ -76,6 +77,7 @@ if __name__ == "__main__":
         image_data = camera_handler.capture_image()
         sensor_data = sensor_handler.read_sensor_data()
         metadata = metadata_handler.add_metadata({}, camera_id="camera_01")
+        print("Sensor Data:", sensor_data)
         formatted_data = format_data(image_data, sensor_data, metadata)
         print("Formatted Data:")
         print(formatted_data)

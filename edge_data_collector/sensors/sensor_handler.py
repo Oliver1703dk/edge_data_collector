@@ -145,12 +145,16 @@ class SensorHandler:
             "Authorization": f"Bearer {self.access_token}"
         }
         response = requests.get(url, headers=headers)
+        print(f"Sensor data request status: {response.status_code}")
+        print(f"Response: {response.text}")
 
         if response.status_code == 401 or response.status_code == 403:  # Token expired or invalid
             print("Access token expired or invalid, refreshing token...")
             self.refresh_access_token()
             headers["Authorization"] = f"Bearer {self.access_token}"
             response = requests.get(url, headers=headers)
+            print(f"Sensor data request status: {response.status_code}")
+            print(f"Response: {response.text}")
 
         if response.status_code == 200:
             devices = response.json().get("body", {}).get("devices", [])
@@ -170,6 +174,7 @@ class SensorHandler:
 
     def _generate_fake_data(self):
         """Generate simulated sensor readings."""
+        print("Generating Fake Sensor Data")
         return {
             "temperature": round(random.uniform(15, 30), 2),
             "humidity": round(random.uniform(30, 90), 2),
