@@ -7,10 +7,10 @@ try:
     PICAMERA2_AVAILABLE = True
 except ImportError:
     PICAMERA2_AVAILABLE = False
-try:
-    from picamera import PiCamera
-except ImportError:
-    from edge_data_collector.camera.mock.pi_camera import PiCamera  # Adjust import if using your mock
+    try:
+        from picamera import PiCamera
+    except ImportError:
+        from edge_data_collector.camera.mock.pi_camera import PiCamera
 
 def record_video(output_folder=None, duration=30, resolution=(1920, 1080), fps=30):
     """
