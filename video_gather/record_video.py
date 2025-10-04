@@ -18,17 +18,17 @@ def record_video(output_folder=None, duration=30, resolution=(1920, 1080)):
     Record a video clip using Picamera2 or legacy PiCamera.
     
     Args:
-        output_folder (str): Folder to save videos (default: 'videos' relative to script dir).
+        output_folder (str): Folder to save videos_gathered (default: 'videos_gathered' relative to script dir).
         duration (int): Recording length in seconds (default: 30).
         resolution (tuple): Video resolution (width, height) (default: (1920, 1080)).
     
     Returns:
         str: Path to the saved video file, or None if failed.
     """
-    # Default to 'videos' folder in script's directory
+    # Default to 'videos_gathered' folder in script's directory
     if output_folder is None:
         script_dir = os.path.dirname(os.path.abspath(__file__))
-        output_folder = os.path.join(script_dir, "videos")
+        output_folder = os.path.join(script_dir, "videos_gathered")
     
     # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
@@ -89,7 +89,7 @@ def record_video(output_folder=None, duration=30, resolution=(1920, 1080)):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Record a short video clip from Raspberry Pi camera.")
-    parser.add_argument("--folder", type=str, default=None, help="Output folder for videos (default: 'videos' in script dir)")
+    parser.add_argument("--folder", type=str, default=None, help="Output folder for videos_gathered (default: 'videos_gathered' in script dir)")
     parser.add_argument("--duration", type=int, default=30, help="Recording duration in seconds (default: 30)")
     parser.add_argument("--resolution", type=str, default="1920,1080", help="Resolution as 'width,height' (default: 1920,1080)")
     
