@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SERVICE_FILE="/etc/systemd/system/record-video.service"
+
+sudo systemctl stop record-video.service || true
+sudo systemctl disable record-video.service || true
+if sudo test -f "$SERVICE_FILE"; then
+    sudo rm "$SERVICE_FILE"
+fi
+sudo systemctl daemon-reload
+sudo reboot

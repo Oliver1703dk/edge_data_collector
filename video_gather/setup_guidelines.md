@@ -2,6 +2,13 @@
 
 Assumes your Pi is already running Debian GNU/Linux 12 (Raspberry Pi OS Bookworm) with camera connected and SSH access as `pi-collector`. Connect via SSH and run these steps.
 
+Run this script: 
+bash video_gather/setup_video_capturing_mode
+
+
+Or 
+
+
 1. **Install Dependencies**:
    ```
    sudo apt update
@@ -16,20 +23,8 @@ Assumes your Pi is already running Debian GNU/Linux 12 (Raspberry Pi OS Bookworm
 
 3. **Deploy Script and Directory**:
    ```
-   mkdir -p /home/pi-collector/edge_data_processor/video_gather
-   nano /home/pi-collector/edge_data_processor/video_gather/record_video.py
-   ```
-   - Paste the script code above, save (Ctrl+O, Enter, Ctrl+X).
-   ```
    chmod +x /home/pi-collector/edge_data_processor/video_gather/record_video.py
    ```
-
-4. **Enable Passwordless Shutdown**:
-   ```
-   sudo visudo
-   ```
-   - Add this line at the end: `pi-collector ALL=(ALL) NOPASSWD: /sbin/shutdown`
-   - Save/exit.
 
 5. **Set Up Auto-Start on Boot**:
    ```

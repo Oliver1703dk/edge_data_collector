@@ -1,6 +1,12 @@
 ## Cleanup Guide
 Disable auto-startup and shutdown after field use. Keeps script and videos intact. Run via SSH.
 
+
+Run this script: 
+bash video_gather/cleanup_video_capturing_mode
+
+
+
 1. **Disable Auto-Run**:
    ```
    sudo systemctl stop record-video.service
