@@ -1,37 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_PATH="/home/pi-collector/edge_data_processor/video_gather/record_video.py"
-SERVICE_FILE="/etc/systemd/system/record-video.service"
-
-sudo chmod +x "$SCRIPT_PATH"
-
-read -r -d '' SERVICE_BODY <<'EOF'
-[Unit]
-Description=Record 30s Video on Boot
-After=multi-user.target
-
-[Service]
-Type=oneshot
-User=pi-collector
-ExecStart=/usr/bin/python3 /home/pi-collector/edge_data_processor/video_gather/record_video.py --duration 30
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-tmp=$(mktemp)
-trap 'rm -f "$tmp"' EXIT
-printf '%s\n' "$SERVICE_BODY" > "$tmp"
-
-if ! sudo test -f "$SERVICE_FILE" || ! sudo cmp -s "$tmp" "$SERVICE_FILE"; then
-    echo "Updating systemd service definition at $SERVICE_FILE"
-    printf '%s\n' "$SERVICE_BODY" | sudo tee "$SERVICE_FILE" > /dev/null
-else
-    echo "Systemd service already up to date."
-fi
-
+sudo chmod +x /home/pi-collector/edge_data_processor/video_gather/record_video.py
 sudo systemctl daemon-reload
 sudo systemctl enable record-video.service
 sudo reboot
