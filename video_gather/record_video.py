@@ -4,6 +4,7 @@ import argparse
 import subprocess  # For shutdown
 try:
     from picamera2 import Picamera2
+    from picamera2.encoders import H264Encoder  # Required for video encoding
     PICAMERA2_AVAILABLE = True
 except ImportError:
     PICAMERA2_AVAILABLE = False
@@ -38,6 +39,7 @@ def record_video(output_folder=None, duration=30, resolution=(1920, 1080)):
     video_path = os.path.join(output_folder, video_filename)
     
     camera = None
+    encoder = None
     try:
         print(f"Starting {duration}s video recording to {video_path}...")
         
@@ -47,7 +49,8 @@ def record_video(output_folder=None, duration=30, resolution=(1920, 1080)):
             config = camera.create_video_configuration(main={"size": resolution})
             camera.configure(config)
             camera.start()  # Start the camera stream (like in your __init__)
-            camera.start_recording(video_path)
+            encoder = H264Encoder()  # H.264 encoder (optional: bitrate=5000000 for quality)
+            camera.start_recording(encoder, video_path)  # encoder first, then output
         else:
             # Fallback to legacy PiCamera
             camera = PiCamera()
