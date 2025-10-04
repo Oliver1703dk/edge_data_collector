@@ -14,6 +14,7 @@ if os.getenv("MQTT_BROKER"):
     MQTT_BROKER = os.getenv("MQTT_BROKER")
 else:
     MQTT_BROKER = "localhost"
+# MQTT_BROKER = "192.168.10.1"
 MQTT_PORT = 1883
 MQTT_TOPIC = "sensor/data"
 

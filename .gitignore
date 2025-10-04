@@ -165,4 +165,15 @@ cython_debug/
 # Processed images
 edge_data_collector/camera/images/
 
+# Video files (for main_video.py)
+*.mp4
+*.avi
+*.mov
+*.mkv
+*.flv
+*.wmv
+*.webm
+videos/
+test_videos/
+
 .vscode/

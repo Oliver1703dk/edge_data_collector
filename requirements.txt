@@ -9,4 +9,6 @@ requests==2.32.3
 urllib3==2.2.3
 # Camera library for Raspberry Pi
 picamera2 ; platform_machine == "armv7l" or platform_machine == "aarch64"
+# OpenCV for video processing (required for main_video.py)
+opencv-python==4.10.0.84
 
