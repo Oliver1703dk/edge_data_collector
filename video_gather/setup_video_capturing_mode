@@ -3,20 +3,34 @@ set -euo pipefail
 
 SCRIPT_PATH="/home/pi-collector/edge_data_processor/video_gather/record_video.py"
 SERVICE_FILE="/etc/systemd/system/record-video.service"
-SERVICE_BODY="[Unit]\nDescription=Record 30s Video on Boot\nAfter=multi-user.target\n\n[Service]\nType=oneshot\nUser=pi-collector\nExecStart=/usr/bin/python3 /home/pi-collector/edge_data_processor/video_gather/record_video.py --duration 30\nRemainAfterExit=yes\n\n[Install]\nWantedBy=multi-user.target\n"
 
 sudo chmod +x "$SCRIPT_PATH"
 
-temp_file=$(mktemp)
-printf '%s' "$SERVICE_BODY" > "$temp_file"
+read -r -d '' SERVICE_BODY <<'EOF'
+[Unit]
+Description=Record 30s Video on Boot
+After=multi-user.target
 
-if ! sudo test -f "$SERVICE_FILE" || ! sudo cmp -s "$temp_file" "$SERVICE_FILE"; then
+[Service]
+Type=oneshot
+User=pi-collector
+ExecStart=/usr/bin/python3 /home/pi-collector/edge_data_processor/video_gather/record_video.py --duration 30
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+tmp=$(mktemp)
+trap 'rm -f "$tmp"' EXIT
+printf '%s\n' "$SERVICE_BODY" > "$tmp"
+
+if ! sudo test -f "$SERVICE_FILE" || ! sudo cmp -s "$tmp" "$SERVICE_FILE"; then
     echo "Updating systemd service definition at $SERVICE_FILE"
-    sudo cp "$temp_file" "$SERVICE_FILE"
+    printf '%s\n' "$SERVICE_BODY" | sudo tee "$SERVICE_FILE" > /dev/null
 else
     echo "Systemd service already up to date."
 fi
-rm -f "$temp_file"
 
 sudo systemctl daemon-reload
 sudo systemctl enable record-video.service
