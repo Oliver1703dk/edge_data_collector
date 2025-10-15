@@ -8,7 +8,7 @@ and are loaded by the main application.
 import os
 
 
-USE_MQTT = False
+USE_MQTT = True
 # If .env file has MQTT_BROKER use that, otherwise use localhost
 if os.getenv("MQTT_BROKER"):
     MQTT_BROKER = os.getenv("MQTT_BROKER")
@@ -18,5 +18,5 @@ else:
 MQTT_PORT = 1883
 MQTT_TOPIC = "sensor/data"
 
-SIMULATE_IMAGE_CREATION = True
+SIMULATE_IMAGE_CREATION = False
 SIMULATE_SENSOR_DATA = False

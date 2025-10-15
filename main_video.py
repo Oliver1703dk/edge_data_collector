@@ -186,13 +186,13 @@ if __name__ == "__main__":
     reload_env()
 
     # Configuration
-    VIDEO_PATH = "path/to/your/video.mp4"  # Change this to your video file path
+    VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_145540.mp4"  # Change this to your video file path
     CAMERA_ID = "video_camera_01"
     
     # Static sensor data configuration
-    STATIC_TEMPERATURE = 22.5  # Celsius
-    STATIC_HUMIDITY = 55.0     # Percentage
-    STATIC_PRESSURE = 1013.25  # hPa
+    STATIC_TEMPERATURE = 12.0  # Celsius
+    STATIC_HUMIDITY = 88.0     # Percentage
+    STATIC_PRESSURE = 995.0  # hPa
     
     # Frame processing interval (in seconds)
     # Set to 0 to process frames as fast as possible
