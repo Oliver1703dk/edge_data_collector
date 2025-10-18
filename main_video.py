@@ -46,6 +46,7 @@ FEATURES:
 
 import time
 import os
+import math
 import cv2
 from dotenv import load_dotenv
 
@@ -85,10 +86,13 @@ class VideoHandler:
         self.fps = self.video_capture.get(cv2.CAP_PROP_FPS)
         self.total_frames = int(self.video_capture.get(cv2.CAP_PROP_FRAME_COUNT))
         self.current_frame = 0
+        self.duration_seconds = (
+            self.total_frames / self.fps if self.fps not in (0, None) else 0.0
+        )
         
         print(f"Video loaded: {video_path}")
-        print(f"FPS: {self.fps}, Total frames: {self.total_frames}")
-    
+        print(f"FPS: {self.fps}, Total frames: {self.total_frames}, Duration: {self.duration_seconds:.3f}s")
+
     def capture_frame(self, compress=False):
         """
         Extract the next frame from the video.
@@ -116,6 +120,50 @@ class VideoHandler:
         cv2.imwrite(frame_path, frame)
         print(f"Frame {self.current_frame}/{self.total_frames} saved to {frame_path}")
         
+        return frame_path
+
+    def capture_frame_at(self, time_seconds, sequence_number):
+        """
+        Extract the frame that corresponds to a given timestamp.
+
+        Args:
+            time_seconds (float): Target timestamp (seconds) inside the video.
+            sequence_number (int): Sequential number for naming consistency.
+
+        Returns:
+            str: Path to the saved frame image, or None if extraction failed.
+        """
+        if self.fps in (0, None):
+            raise ValueError("Video FPS is zero; cannot align frames by time.")
+
+        frame_index = min(
+            int(math.floor(time_seconds * self.fps)),
+            max(self.total_frames - 1, 0)
+        )
+
+        if frame_index < 0 or frame_index >= self.total_frames:
+            print(f"Requested frame at {time_seconds:.3f}s is outside video duration.")
+            return None
+
+        self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
+        ret, frame = self.video_capture.read()
+
+        if not ret or frame is None:
+            print(f"Failed to read frame at {time_seconds:.3f}s (index {frame_index}).")
+            return None
+
+        timestamp = int(time.time())
+        frame_path = os.path.join(
+            self.image_folder,
+            f"video_frame_{self.camera_id}_{timestamp}_{sequence_number}.jpg"
+        )
+        cv2.imwrite(frame_path, frame)
+        self.current_frame = frame_index + 1
+        print(
+            f"Aligned frame {sequence_number} (video t={time_seconds:.3f}s, index {frame_index + 1}/{self.total_frames}) "
+            f"saved to {frame_path}"
+        )
+
         return frame_path
     
     def reset_video(self):
@@ -186,7 +234,7 @@ if __name__ == "__main__":
     reload_env()
 
     # Configuration
-    VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_145540.mp4"  # Change this to your video file path
+    VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150618.mp4"  # Change this to your video file path
     CAMERA_ID = "video_camera_01"
     
     # Static sensor data configuration
@@ -194,10 +242,10 @@ if __name__ == "__main__":
     STATIC_HUMIDITY = 88.0     # Percentage
     STATIC_PRESSURE = 995.0  # hPa
     
-    # Frame processing interval (in seconds)
-    # Set to 0 to process frames as fast as possible
-    # Set to match video FPS for real-time playback (e.g., 1/30 for 30fps video)
-    FRAME_INTERVAL = 1.0  # Process one frame per second
+    # Frame processing interval (seconds). The capture aligns to the equivalent
+    # timestamp in the video (e.g., 1.0 sends frames from 1s, 2s, 3s...).
+    # Must be greater than zero.
+    FRAME_INTERVAL = 0.5  # Example: capture and publish once per second
     
     # Load MQTT configuration from config.py
     use_mqtt = config.USE_MQTT
@@ -225,36 +273,53 @@ if __name__ == "__main__":
     metadata_handler = MetadataHandler()
 
     if use_mqtt:
-        mqtt_handler = MqttHandler(mqtt_broker, mqtt_port, mqtt_topic)
-        mqtt_handler.connect()
-        try:
-            while video_handler.has_frames():
-                # Extract frame from video
-                frame_path = video_handler.capture_frame()
-                
-                if frame_path is None:
-                    print("No more frames to process.")
-                    break
-                
-                # Get static sensor data
-                sensor_data = sensor_handler.read_sensor_data()
-                
-                # Add metadata
-                metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID)
-                
-                # Format and publish data
-                formatted_data = format_data(frame_path, sensor_data, metadata)
-                mqtt_handler.publish(formatted_data)
-                print('Data Published')
-                
-                # Wait before processing next frame
-                time.sleep(FRAME_INTERVAL)
-                
-        except KeyboardInterrupt:
-            print("\nStopping video processing...")
-        finally:
-            video_handler.close()
-            print("Video processing completed.")
+        if FRAME_INTERVAL <= 0:
+            raise ValueError("FRAME_INTERVAL must be greater than zero for aligned capture.")
+
+        if video_handler.duration_seconds <= 0:
+            print("Video duration is zero; nothing to process.")
+        else:
+            mqtt_handler = MqttHandler(mqtt_broker, mqtt_port, mqtt_topic)
+            mqtt_handler.connect()
+            start_time = time.time()
+            sample_index = 1
+
+            try:
+                while True:
+                    target_video_time = sample_index * FRAME_INTERVAL
+
+                    if target_video_time > video_handler.duration_seconds:
+                        print("Reached end of video based on configured interval.")
+                        break
+
+                    # Wait until the scheduled wall-clock time before sending
+                    scheduled_wall_time = start_time + target_video_time
+                    sleep_duration = scheduled_wall_time - time.time()
+                    if sleep_duration > 0:
+                        time.sleep(sleep_duration)
+
+                    frame_path = video_handler.capture_frame_at(
+                        time_seconds=target_video_time,
+                        sequence_number=sample_index
+                    )
+
+                    if frame_path is None:
+                        print("Failed to capture aligned frame; stopping.")
+                        break
+
+                    sensor_data = sensor_handler.read_sensor_data()
+                    metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID)
+                    formatted_data = format_data(frame_path, sensor_data, metadata)
+                    mqtt_handler.publish(formatted_data)
+                    print(f"Data Published (interval index {sample_index}, video t={target_video_time:.3f}s)")
+
+                    sample_index += 1
+
+            except KeyboardInterrupt:
+                print("\nStopping video processing...")
+            finally:
+                video_handler.close()
+                print("Video processing completed.")
     else:
         # Process a single frame without MQTT
         frame_path = video_handler.capture_frame()

@@ -110,6 +110,18 @@ def test_video_handler():
         print(f"  FPS: {video_handler.fps}")
         print(f"  Total frames: {video_handler.total_frames}")
         print(f"  Current frame: {video_handler.current_frame}")
+
+        # Test aligned capture at specific timestamp
+        target_time = 1.0  # seconds
+        sequence_number = 42
+        aligned_frame = video_handler.capture_frame_at(
+            time_seconds=target_time,
+            sequence_number=sequence_number
+        )
+        if aligned_frame:
+            print(f"\n✓ Aligned frame extracted at {target_time}s: {os.path.basename(aligned_frame)}")
+        else:
+            print(f"\n✗ Failed to extract aligned frame at {target_time}s")
         
         # Clean up
         video_handler.close()
