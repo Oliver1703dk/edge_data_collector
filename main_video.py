@@ -234,7 +234,7 @@ if __name__ == "__main__":
     reload_env()
 
     # Configuration
-    VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150618.mp4"  # Change this to your video file path
+    VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150019.mp4"  # Change this to your video file path
     CAMERA_ID = "video_camera_01"
     
     # Static sensor data configuration
@@ -246,7 +246,7 @@ if __name__ == "__main__":
     # timestamp in the video (e.g., 1.0 sends frames from 1s, 2s, 3s...).
     # Must be greater than zero.
     FRAME_INTERVAL = 0.5  # Example: capture and publish once per second
-    
+
     # Load MQTT configuration from config.py
     use_mqtt = config.USE_MQTT
     mqtt_broker = config.MQTT_BROKER
@@ -309,6 +309,8 @@ if __name__ == "__main__":
 
                     sensor_data = sensor_handler.read_sensor_data()
                     metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID)
+                    metadata["video_timestamp_sec"] = round(target_video_time, 3)
+                    metadata["video_file"] = os.path.basename(VIDEO_PATH)
                     formatted_data = format_data(frame_path, sensor_data, metadata)
                     mqtt_handler.publish(formatted_data)
                     print(f"Data Published (interval index {sample_index}, video t={target_video_time:.3f}s)")
@@ -327,6 +329,12 @@ if __name__ == "__main__":
         if frame_path:
             sensor_data = sensor_handler.read_sensor_data()
             metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID)
+            if video_handler.fps not in (0, None):
+                frame_index = max(video_handler.current_frame - 1, 0)
+                metadata["video_timestamp_sec"] = round(frame_index / video_handler.fps, 3)
+            else:
+                metadata["video_timestamp_sec"] = None
+            metadata["video_file"] = os.path.basename(VIDEO_PATH)
             print("Sensor Data:", sensor_data)
             formatted_data = format_data(frame_path, sensor_data, metadata)
             print("Formatted Data:")
