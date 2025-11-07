@@ -1,5 +1,6 @@
 import paho.mqtt.client as mqtt
 import json
+import time
 
 class MqttHandler:
     def __init__(self, broker_address, port, topic):
@@ -25,4 +26,12 @@ class MqttHandler:
         Args:
             payload (dict): JSON-serializable data to be sent.
         """
+        metadata = payload.setdefault("metadata", {})
+        capture_ts = metadata.get("collector_capture_ts")
+        if capture_ts is not None:
+            metadata["collector_capture_ts"] = float(capture_ts)
+
+        metadata["collector_publish_ts"] = time.time()
+        payload["metadata"] = metadata
+
         self.client.publish(self.topic, json.dumps(payload))

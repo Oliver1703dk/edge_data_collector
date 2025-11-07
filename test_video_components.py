@@ -93,13 +93,14 @@ def test_video_handler():
         max_frames = 5  # Only extract first 5 frames for testing
         
         while video_handler.has_frames() and frame_count < max_frames:
-            frame_path = video_handler.capture_frame()
+            frame_path, capture_ts = video_handler.capture_frame()
             if frame_path:
                 frame_count += 1
                 print(f"  ✓ Frame {frame_count} extracted: {os.path.basename(frame_path)}")
                 # Verify the file exists and has content
                 if os.path.exists(frame_path) and os.path.getsize(frame_path) > 0:
                     print(f"    File size: {os.path.getsize(frame_path)} bytes")
+                    print(f"    Capture timestamp: {capture_ts}")
                 else:
                     print(f"    ✗ Error: Frame file is invalid")
             else:
@@ -114,12 +115,13 @@ def test_video_handler():
         # Test aligned capture at specific timestamp
         target_time = 1.0  # seconds
         sequence_number = 42
-        aligned_frame = video_handler.capture_frame_at(
+        aligned_frame, capture_ts = video_handler.capture_frame_at(
             time_seconds=target_time,
             sequence_number=sequence_number
         )
         if aligned_frame:
             print(f"\n✓ Aligned frame extracted at {target_time}s: {os.path.basename(aligned_frame)}")
+            print(f"  Capture timestamp: {capture_ts}")
         else:
             print(f"\n✗ Failed to extract aligned frame at {target_time}s")
         

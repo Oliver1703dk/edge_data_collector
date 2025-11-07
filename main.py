@@ -63,10 +63,14 @@ if __name__ == "__main__":
         mqtt_handler.connect()
         try:
             while True:
-                image_data = camera_handler.capture_image()
+                image_path, capture_ts = camera_handler.capture_image()
+                if not image_path:
+                    print("Skipping publish; no image captured.")
+                    continue
                 sensor_data = sensor_handler.read_sensor_data()
                 metadata = metadata_handler.add_metadata({}, camera_id="camera_01")
-                formatted_data = format_data(image_data, sensor_data, metadata)
+                metadata["collector_capture_ts"] = capture_ts
+                formatted_data = format_data(image_path, sensor_data, metadata)
                 mqtt_handler.publish(formatted_data)
                 print('Data Published')
                 # print("Published Data:", formatted_data)
@@ -74,10 +78,13 @@ if __name__ == "__main__":
         except KeyboardInterrupt:
             print("Stopping data sender...")
     else:
-        image_data = camera_handler.capture_image()
+        image_path, capture_ts = camera_handler.capture_image()
+        if not image_path:
+            raise RuntimeError("Failed to capture image")
         sensor_data = sensor_handler.read_sensor_data()
         metadata = metadata_handler.add_metadata({}, camera_id="camera_01")
+        metadata["collector_capture_ts"] = capture_ts
         print("Sensor Data:", sensor_data)
-        formatted_data = format_data(image_data, sensor_data, metadata)
+        formatted_data = format_data(image_path, sensor_data, metadata)
         print("Formatted Data:")
         print(formatted_data)

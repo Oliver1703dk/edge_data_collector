@@ -166,7 +166,7 @@ cython_debug/
 edge_data_collector/camera/images/
 
 # Video files (for main_video.py)
-*.mp4
+#*.mp4
 *.avi
 *.mov
 *.mkv

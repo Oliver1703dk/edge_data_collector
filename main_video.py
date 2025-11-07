@@ -101,26 +101,27 @@ class VideoHandler:
             compress (bool): Whether to compress the frame (not implemented, kept for compatibility)
         
         Returns:
-            str: Path to the saved frame image, or None if video ended
+            tuple[str | None, float | None]: Path to the saved frame image and
+            the capture timestamp (seconds since epoch), or (None, None) if video ended
         """
         ret, frame = self.video_capture.read()
         
         if not ret:
             print("End of video reached or error reading frame.")
-            return None
+            return None, None
         
         self.current_frame += 1
-        timestamp = int(time.time())
+        capture_time = time.time()
         frame_path = os.path.join(
             self.image_folder, 
-            f"video_frame_{self.camera_id}_{timestamp}_{self.current_frame}.jpg"
+            f"video_frame_{self.camera_id}_{int(capture_time)}_{self.current_frame}.jpg"
         )
         
         # Save the frame as an image
         cv2.imwrite(frame_path, frame)
         print(f"Frame {self.current_frame}/{self.total_frames} saved to {frame_path}")
         
-        return frame_path
+        return frame_path, capture_time
 
     def capture_frame_at(self, time_seconds, sequence_number):
         """
@@ -131,7 +132,8 @@ class VideoHandler:
             sequence_number (int): Sequential number for naming consistency.
 
         Returns:
-            str: Path to the saved frame image, or None if extraction failed.
+            tuple[str | None, float | None]: Path to the saved frame image and its
+            capture timestamp (seconds since epoch), or (None, None) if extraction failed.
         """
         if self.fps in (0, None):
             raise ValueError("Video FPS is zero; cannot align frames by time.")
@@ -143,19 +145,19 @@ class VideoHandler:
 
         if frame_index < 0 or frame_index >= self.total_frames:
             print(f"Requested frame at {time_seconds:.3f}s is outside video duration.")
-            return None
+            return None, None
 
         self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
         ret, frame = self.video_capture.read()
 
         if not ret or frame is None:
             print(f"Failed to read frame at {time_seconds:.3f}s (index {frame_index}).")
-            return None
+            return None, None
 
-        timestamp = int(time.time())
+        capture_time = time.time()
         frame_path = os.path.join(
             self.image_folder,
-            f"video_frame_{self.camera_id}_{timestamp}_{sequence_number}.jpg"
+            f"video_frame_{self.camera_id}_{int(capture_time)}_{sequence_number}.jpg"
         )
         cv2.imwrite(frame_path, frame)
         self.current_frame = frame_index + 1
@@ -164,7 +166,7 @@ class VideoHandler:
             f"saved to {frame_path}"
         )
 
-        return frame_path
+        return frame_path, capture_time
     
     def reset_video(self):
         """Reset video to the beginning."""
@@ -298,17 +300,18 @@ if __name__ == "__main__":
                     if sleep_duration > 0:
                         time.sleep(sleep_duration)
 
-                    frame_path = video_handler.capture_frame_at(
+                    frame_path, capture_ts = video_handler.capture_frame_at(
                         time_seconds=target_video_time,
                         sequence_number=sample_index
                     )
 
-                    if frame_path is None:
+                    if not frame_path:
                         print("Failed to capture aligned frame; stopping.")
                         break
 
                     sensor_data = sensor_handler.read_sensor_data()
                     metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID)
+                    metadata["collector_capture_ts"] = capture_ts
                     metadata["video_timestamp_sec"] = round(target_video_time, 3)
                     metadata["video_file"] = os.path.basename(VIDEO_PATH)
                     formatted_data = format_data(frame_path, sensor_data, metadata)
@@ -324,11 +327,12 @@ if __name__ == "__main__":
                 print("Video processing completed.")
     else:
         # Process a single frame without MQTT
-        frame_path = video_handler.capture_frame()
+        frame_path, capture_ts = video_handler.capture_frame()
         
         if frame_path:
             sensor_data = sensor_handler.read_sensor_data()
             metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID)
+            metadata["collector_capture_ts"] = capture_ts
             if video_handler.fps not in (0, None):
                 frame_index = max(video_handler.current_frame - 1, 0)
                 metadata["video_timestamp_sec"] = round(frame_index / video_handler.fps, 3)

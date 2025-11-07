@@ -40,24 +40,25 @@ class CameraHandler:
         Capture an image from the camera, optionally compressing it.
 
         Args:
-            compress (bool): Whether to compress the captured image. Default is True.
+            compress (bool): Whether to compress the captured image. Default is False.
 
         Returns:
-            str: Path to the saved image (compressed or raw).
+            tuple[str | None, float | None]: Path to the saved image (compressed or raw)
+            and the capture timestamp as seconds since the Unix epoch.
         """
-
+        capture_timestamp = None
 
         if(self.simulate_image_creation):
             # # Simulate image capture
-            raw_image_path = self.simulate_image_capture()
+            raw_image_path, capture_timestamp = self.simulate_image_capture()
 
         else:
             # Real image capture 
-            raw_image_path = self.capture_image_using_camera()
+            raw_image_path, capture_timestamp = self.capture_image_using_camera()
 
         if not raw_image_path:
             print("Failed to capture image.")
-            return None
+            return None, None
 
 
         print(f"Raw image saved to {raw_image_path}")
@@ -75,9 +76,9 @@ class CameraHandler:
             os.remove(raw_image_path)
             print(f"Raw image deleted: {raw_image_path}")
 
-            return compressed_image_path
+            return compressed_image_path, capture_timestamp
         else:
-            return raw_image_path
+            return raw_image_path, capture_timestamp
         
 
     # Simulate image Capturing
@@ -86,17 +87,17 @@ class CameraHandler:
         Simulate capturing an image by creating a placeholder file.
 
         Returns:
-            str: Path to the simulated raw image.
+            tuple[str, float]: Path to the simulated raw image and capture timestamp.
         """
-        timestamp = int(time.time())
-        raw_image_path = os.path.join(self.image_folder, f"raw_image_{timestamp}.jpg")
+        capture_time = time.time()
+        raw_image_path = os.path.join(self.image_folder, f"raw_image_{int(capture_time)}.jpg")
 
         # Create a placeholder raw image (for simulation purposes)
         with open(raw_image_path, "wb") as f:
             f.write(os.urandom(1024 * 1024))  # Write 1MB of random data to simulate an image
 
         print(f"Raw image simulated and saved to {raw_image_path}")
-        return raw_image_path
+        return raw_image_path, capture_time
 
 
 
@@ -105,10 +106,11 @@ class CameraHandler:
         Capture an image using the Raspberry Pi camera.
 
         Returns:
-            str: Path to the captured raw image.
+            tuple[str | None, float | None]: Path to the captured raw image and
+            capture timestamp, or (None, None) on failure.
         """
-        timestamp = int(time.time())
-        raw_image_path = os.path.join(self.image_folder, f"raw_image_{timestamp}.jpg")
+        capture_time = time.time()
+        raw_image_path = os.path.join(self.image_folder, f"raw_image_{int(capture_time)}.jpg")
         print(f"Capturing image from camera {self.camera_id}")
 
 
@@ -120,10 +122,10 @@ class CameraHandler:
                 self.camera.capture(raw_image_path)
         except Exception as e:
             print(f"Failed to capture image: {e}")
-            return None
+            return None, None
 
         print(f"Image captured using camera and saved to {raw_image_path}")
-        return raw_image_path
+        return raw_image_path, capture_time
     
 
     def close_camera(self):
@@ -144,9 +146,9 @@ class CameraHandler:
 if __name__ == "__main__":
     camera = CameraHandler(camera_id="camera_01")
     # Capture a compressed image
-    compressed_image = camera.capture_image(compress=True)
-    print(f"Compressed image available at: {compressed_image}")
+    compressed_image, compressed_ts = camera.capture_image(compress=True)
+    print(f"Compressed image available at: {compressed_image} (captured at {compressed_ts})")
 
     # Capture a raw image without compression
-    raw_image = camera.capture_image(compress=False)
-    print(f"Raw image available at: {raw_image}")
+    raw_image, raw_ts = camera.capture_image(compress=False)
+    print(f"Raw image available at: {raw_image} (captured at {raw_ts})")

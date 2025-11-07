@@ -227,10 +227,11 @@ for video_path in video_files:
     metadata_handler = MetadataHandler()
     
     while video_handler.has_frames():
-        frame_path = video_handler.capture_frame()
+        frame_path, capture_ts = video_handler.capture_frame()
         if frame_path:
             sensor_data = sensor_handler.read_sensor_data()
             metadata = metadata_handler.add_metadata({}, camera_id="batch_camera")
+            metadata["collector_capture_ts"] = capture_ts
             formatted_data = format_data(frame_path, sensor_data, metadata)
             # Process formatted_data...
     
