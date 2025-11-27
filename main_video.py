@@ -239,15 +239,25 @@ if __name__ == "__main__":
     VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150019.mp4"  # Change this to your video file path
     CAMERA_ID = "video_camera_01"
     
-    # Static sensor data configuration
+    ## Static sensor data configuration
     STATIC_TEMPERATURE = 12.0  # Celsius
     STATIC_HUMIDITY = 88.0     # Percentage
     STATIC_PRESSURE = 995.0  # hPa
+
+    ## Not flooding/dry conditions
+    # STATIC_TEMPERATURE = 22.0  # Celsius (ΔT = +5°C, opposite of -5°C)
+    # STATIC_HUMIDITY = 68.0     # Percentage (ΔH = -10%, opposite of +10%)
+    # STATIC_PRESSURE = 1037.0   # hPa (ΔP = +21 hPa, opposite of -21 hPa)
+
+    ## Neutral conditions (no change)
+    # STATIC_TEMPERATURE = 17.0  # Celsius (at baseline)
+    # STATIC_HUMIDITY = 78.0     # Percentage (at baseline)
+    # STATIC_PRESSURE = 1016.0   # hPa (at baseline)
     
     # Frame processing interval (seconds). The capture aligns to the equivalent
     # timestamp in the video (e.g., 1.0 sends frames from 1s, 2s, 3s...).
     # Must be greater than zero.
-    FRAME_INTERVAL = 0.5  # Example: capture and publish once per second
+    FRAME_INTERVAL = 0.2  # Example: capture and publish once per second
 
     # Load MQTT configuration from config.py
     use_mqtt = config.USE_MQTT
