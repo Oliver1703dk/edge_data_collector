@@ -239,25 +239,25 @@ if __name__ == "__main__":
     VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150019.mp4"  # Change this to your video file path
     CAMERA_ID = "video_camera_01"
     
-    ## Static sensor data configuration
-    STATIC_TEMPERATURE = 12.0  # Celsius
-    STATIC_HUMIDITY = 88.0     # Percentage
-    STATIC_PRESSURE = 995.0  # hPa
+    ## FLOODING conditions — triggers strong positive boost
+    # STATIC_TEMPERATURE = 13.5   # ΔT = 13.5 – 17.0 = -3.5 °C → triggers temp drop (-2.5 °C) → +0.05 (or +0.10 if severe)
+    # STATIC_HUMIDITY    = 96.0   # ΔRH = 96.0 – 78.0 = +18 % → with cooling → triggers humidity boost +0.10 → +0.20 if >30
+    # STATIC_PRESSURE    = 1008.0 # ΔP = 1008.0 – 1016.0 = -8 hPa → triggers pressure drop → +0.03 → +0.06 if <–10
 
-    ## Not flooding/dry conditions
-    # STATIC_TEMPERATURE = 22.0  # Celsius (ΔT = +5°C, opposite of -5°C)
-    # STATIC_HUMIDITY = 68.0     # Percentage (ΔH = -10%, opposite of +10%)
-    # STATIC_PRESSURE = 1037.0   # hPa (ΔP = +21 hPa, opposite of -21 hPa)
+    ## NOT FLOODING / HOT & DRY — triggers negative boost
+    # STATIC_TEMPERATURE = 27.0   # ΔT = 27.0 – 17.0 = +10.0 °C → very hot anomaly
+    # STATIC_HUMIDITY    = 45.0   # ΔRH = 45.0 – 78.0 = -33 % → extremely dry
+    # STATIC_PRESSURE    = 1018.0 # ΔP = +2 hPa → neutral/high (no storm signal)
 
-    ## Neutral conditions (no change)
-    # STATIC_TEMPERATURE = 17.0  # Celsius (at baseline)
-    # STATIC_HUMIDITY = 78.0     # Percentage (at baseline)
-    # STATIC_PRESSURE = 1016.0   # hPa (at baseline)
+    ## NEUTRAL conditions — no anomaly, sensor_boost = 0.0
+    STATIC_TEMPERATURE = 17.0   # ΔT = 0.0 °C
+    STATIC_HUMIDITY    = 78.0   # ΔRH = 0.0 %
+    STATIC_PRESSURE    = 1016.0 # ΔP = 0.0 hPa
     
     # Frame processing interval (seconds). The capture aligns to the equivalent
     # timestamp in the video (e.g., 1.0 sends frames from 1s, 2s, 3s...).
     # Must be greater than zero.
-    FRAME_INTERVAL = 0.2  # Example: capture and publish once per second
+    FRAME_INTERVAL = 0.5  # Example: capture and publish once per second
 
     # Load MQTT configuration from config.py
     use_mqtt = config.USE_MQTT
