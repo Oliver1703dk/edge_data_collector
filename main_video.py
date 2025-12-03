@@ -238,6 +238,11 @@ if __name__ == "__main__":
     # Configuration
     VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150257.mp4"  # Change this to your video file path
     CAMERA_ID = "video_camera_01"
+
+    ## REAL WORLD conditions — no anomaly, sensor_boost = 0.0
+    STATIC_TEMPERATURE = 12.0   # ΔT = 0.0 °C
+    STATIC_HUMIDITY    = 88.0   # ΔRH = 0.0 %
+    STATIC_PRESSURE    = 995.0 # ΔP = 0.0 hPa
     
     ## FLOODING conditions — triggers strong positive boost
     # STATIC_TEMPERATURE = 13.5   # ΔT = 13.5 – 17.0 = -3.5 °C → triggers temp drop (-2.5 °C) → +0.05 (or +0.10 if severe)
@@ -250,9 +255,9 @@ if __name__ == "__main__":
     # STATIC_PRESSURE    = 1018.0 # ΔP = +2 hPa → neutral/high (no storm signal)
 
     ## NEUTRAL conditions — no anomaly, sensor_boost = 0.0
-    STATIC_TEMPERATURE = 17.0   # ΔT = 0.0 °C
-    STATIC_HUMIDITY    = 78.0   # ΔRH = 0.0 %
-    STATIC_PRESSURE    = 1016.0 # ΔP = 0.0 hPa
+    # STATIC_TEMPERATURE = 17.0   # ΔT = 0.0 °C
+    # STATIC_HUMIDITY    = 78.0   # ΔRH = 0.0 %
+    # STATIC_PRESSURE    = 1016.0 # ΔP = 0.0 hPa
     
     # Frame processing interval (seconds). The capture aligns to the equivalent
     # timestamp in the video (e.g., 1.0 sends frames from 1s, 2s, 3s...).
