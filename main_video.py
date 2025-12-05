@@ -1,49 +1,3 @@
-"""
-main_video.py - Video-based Edge Data Collection System
-
-This script processes a video file frame-by-frame instead of using a live camera feed,
-and uses static sensor data instead of querying real sensors. It maintains the same
-functionality as main.py but operates on pre-recorded video.
-
-SETUP:
-------
-1. Install OpenCV (required for video processing):
-   pip install opencv-python
-
-2. Update the VIDEO_PATH variable (line ~150) to point to your video file:
-   VIDEO_PATH = "path/to/your/video.mp4"
-
-3. (Optional) Adjust static sensor values:
-   STATIC_TEMPERATURE = 22.5  # Celsius
-   STATIC_HUMIDITY = 55.0     # Percentage
-   STATIC_PRESSURE = 1013.25  # hPa
-
-4. (Optional) Adjust frame processing interval:
-   FRAME_INTERVAL = 1.0  # Process one frame per second
-
-USAGE:
-------
-Run the script:
-    python main_video.py
-
-The script will:
-- Extract frames from the video file
-- Attach static sensor data to each frame
-- Add metadata (timestamp, camera ID)
-- Format and publish data via MQTT (if enabled in config.py)
-- Save extracted frames to edge_data_collector/camera/images/
-
-Press Ctrl+C to stop processing.
-
-FEATURES:
----------
-- VideoHandler: Extracts frames from video files using OpenCV
-- StaticSensorHandler: Provides consistent sensor readings
-- Compatible with existing MQTT and data formatting infrastructure
-- Processes video at configurable frame rates
-- Automatically handles video end and cleanup
-"""
-
 import time
 import os
 import math
@@ -57,7 +11,49 @@ from edge_data_sender.transmission.mqtt_handler import MqttHandler
 
 import config
 
-import config
+
+# ============================================================================
+# CONFIGURATION - Comment/uncomment sections to change settings
+# ============================================================================
+
+# Video file path configuration
+VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150257.mp4"
+# VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_145739.mp4"
+# VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150218.mp4"
+# VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150338.mp4"
+
+CAMERA_ID = "video_camera_01"
+
+# Motion configuration
+MOTION = "slow"
+# MOTION = "fast"
+# MOTION = "stop"
+
+# Sensor values configuration
+## REAL WORLD conditions — no anomaly, sensor_boost = 0.0
+STATIC_TEMPERATURE = 12.0   # ΔT = 0.0 °C
+STATIC_HUMIDITY    = 88.0   # ΔRH = 0.0 %
+STATIC_PRESSURE    = 995.0 # ΔP = 0.0 hPa
+
+## FLOODING conditions — triggers strong positive boost
+# STATIC_TEMPERATURE = 13.5   # ΔT = 13.5 – 17.0 = -3.5 °C → triggers temp drop (-2.5 °C) → +0.05 (or +0.10 if severe)
+# STATIC_HUMIDITY    = 96.0   # ΔRH = 96.0 – 78.0 = +18 % → with cooling → triggers humidity boost +0.10 → +0.20 if >30
+# STATIC_PRESSURE    = 1008.0 # ΔP = 1008.0 – 1016.0 = -8 hPa → triggers pressure drop → +0.03 → +0.06 if <–10
+
+## NOT FLOODING / HOT & DRY — triggers negative boost
+# STATIC_TEMPERATURE = 27.0   # ΔT = 27.0 – 17.0 = +10.0 °C → very hot anomaly
+# STATIC_HUMIDITY    = 45.0   # ΔRH = 45.0 – 78.0 = -33 % → extremely dry
+# STATIC_PRESSURE    = 1018.0 # ΔP = +2 hPa → neutral/high (no storm signal)
+
+## NEUTRAL conditions — no anomaly, sensor_boost = 0.0
+# STATIC_TEMPERATURE = 17.0   # ΔT = 0.0 °C
+# STATIC_HUMIDITY    = 78.0   # ΔRH = 0.0 %
+# STATIC_PRESSURE    = 1016.0 # ΔP = 0.0 hPa
+
+# Frame processing interval (seconds). The capture aligns to the equivalent
+# timestamp in the video (e.g., 1.0 sends frames from 1s, 2s, 3s...).
+# Must be greater than zero.
+FRAME_INTERVAL = 0.5  # Example: capture and publish once per second
 
 
 class VideoHandler:
@@ -235,35 +231,6 @@ def reload_env():
 if __name__ == "__main__":
     reload_env()
 
-    # Configuration
-    VIDEO_PATH = "video_gather/best_videos/flood_video_20251005_150257.mp4"  # Change this to your video file path
-    CAMERA_ID = "video_camera_01"
-
-    ## REAL WORLD conditions — no anomaly, sensor_boost = 0.0
-    STATIC_TEMPERATURE = 12.0   # ΔT = 0.0 °C
-    STATIC_HUMIDITY    = 88.0   # ΔRH = 0.0 %
-    STATIC_PRESSURE    = 995.0 # ΔP = 0.0 hPa
-    
-    ## FLOODING conditions — triggers strong positive boost
-    # STATIC_TEMPERATURE = 13.5   # ΔT = 13.5 – 17.0 = -3.5 °C → triggers temp drop (-2.5 °C) → +0.05 (or +0.10 if severe)
-    # STATIC_HUMIDITY    = 96.0   # ΔRH = 96.0 – 78.0 = +18 % → with cooling → triggers humidity boost +0.10 → +0.20 if >30
-    # STATIC_PRESSURE    = 1008.0 # ΔP = 1008.0 – 1016.0 = -8 hPa → triggers pressure drop → +0.03 → +0.06 if <–10
-
-    ## NOT FLOODING / HOT & DRY — triggers negative boost
-    # STATIC_TEMPERATURE = 27.0   # ΔT = 27.0 – 17.0 = +10.0 °C → very hot anomaly
-    # STATIC_HUMIDITY    = 45.0   # ΔRH = 45.0 – 78.0 = -33 % → extremely dry
-    # STATIC_PRESSURE    = 1018.0 # ΔP = +2 hPa → neutral/high (no storm signal)
-
-    ## NEUTRAL conditions — no anomaly, sensor_boost = 0.0
-    # STATIC_TEMPERATURE = 17.0   # ΔT = 0.0 °C
-    # STATIC_HUMIDITY    = 78.0   # ΔRH = 0.0 %
-    # STATIC_PRESSURE    = 1016.0 # ΔP = 0.0 hPa
-    
-    # Frame processing interval (seconds). The capture aligns to the equivalent
-    # timestamp in the video (e.g., 1.0 sends frames from 1s, 2s, 3s...).
-    # Must be greater than zero.
-    FRAME_INTERVAL = 0.5  # Example: capture and publish once per second
-
     # Load MQTT configuration from config.py
     use_mqtt = config.USE_MQTT
     mqtt_broker = config.MQTT_BROKER
@@ -325,7 +292,7 @@ if __name__ == "__main__":
                         break
 
                     sensor_data = sensor_handler.read_sensor_data()
-                    metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID)
+                    metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID, motion=MOTION)
                     metadata["collector_capture_ts"] = capture_ts
                     metadata["video_timestamp_sec"] = round(target_video_time, 3)
                     metadata["video_file"] = os.path.basename(VIDEO_PATH)
@@ -346,7 +313,7 @@ if __name__ == "__main__":
         
         if frame_path:
             sensor_data = sensor_handler.read_sensor_data()
-            metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID)
+            metadata = metadata_handler.add_metadata({}, camera_id=CAMERA_ID, motion=MOTION)
             metadata["collector_capture_ts"] = capture_ts
             if video_handler.fps not in (0, None):
                 frame_index = max(video_handler.current_frame - 1, 0)
