@@ -30,10 +30,10 @@ MOTION = "slow"
 # MOTION = "stop"
 
 # Sensor values configuration
-## REAL WORLD conditions — no anomaly, sensor_boost = 0.0
-STATIC_TEMPERATURE = 12.0   # ΔT = 0.0 °C
-STATIC_HUMIDITY    = 88.0   # ΔRH = 0.0 %
-STATIC_PRESSURE    = 995.0 # ΔP = 0.0 hPa
+## REAL WORLD conditions — no anomaly, sensor_boost
+STATIC_TEMPERATURE = 12.0   # ΔT = 
+STATIC_HUMIDITY    = 88.0   # ΔRH = 
+STATIC_PRESSURE    = 995.0 # ΔP = 
 
 ## FLOODING conditions — triggers strong positive boost
 # STATIC_TEMPERATURE = 13.5   # ΔT = 13.5 – 17.0 = -3.5 °C → triggers temp drop (-2.5 °C) → +0.05 (or +0.10 if severe)
