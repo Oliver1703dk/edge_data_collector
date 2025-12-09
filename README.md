@@ -44,18 +44,24 @@ The project includes `main_video.py` for processing pre-recorded video files ins
 2. **Configure the video source** in `main_video.py`:
    ```python
    VIDEO_PATH = "path/to/your/video.mp4"  # Update this path
+   CAMERA_ID = "video_camera_01"          # Camera identifier for metadata
    ```
 
-3. **Adjust static sensor values** (optional):
+3. **Configure motion state** (optional):
    ```python
-   STATIC_TEMPERATURE = 22.5  # Celsius
-   STATIC_HUMIDITY = 55.0     # Percentage
-   STATIC_PRESSURE = 1013.25  # hPa
+   MOTION = "slow"   # Options: "slow", "fast", "stop"
    ```
 
-4. **Set frame processing interval** (optional):
+4. **Adjust static sensor values** (optional):
    ```python
-   FRAME_INTERVAL = 1.0  # Process one frame per second
+   STATIC_TEMPERATURE = 12.0   # Celsius
+   STATIC_HUMIDITY    = 88.0   # Percentage
+   STATIC_PRESSURE    = 995.0  # hPa
+   ```
+
+5. **Set frame processing interval** (optional):
+   ```python
+   FRAME_INTERVAL = 0.5  # Seconds between frames (aligned to video timestamps)
    ```
 
 ### Running Video Mode
@@ -65,9 +71,9 @@ python main_video.py
 ```
 
 The script will:
-- Extract frames from the video file sequentially
+- Extract frames at time-aligned intervals (based on `FRAME_INTERVAL`)
 - Attach static sensor data to each frame
-- Add metadata (timestamp, camera ID)
+- Add metadata (timestamp, camera ID, video timestamp, motion state)
 - Format and publish data via MQTT (if enabled in `config.py`)
 - Save extracted frames to `edge_data_collector/camera/images/`
 
@@ -77,7 +83,7 @@ Press `Ctrl+C` to stop processing at any time.
 
 - **VideoHandler**: Extracts frames from video files using OpenCV
 - **StaticSensorHandler**: Provides consistent sensor readings throughout video processing
-- **Frame-by-frame processing**: Processes video at configurable intervals
+- **Time-aligned extraction**: Extracts frames at precise video timestamps based on interval
 - **Automatic cleanup**: Properly releases video resources when done
 - **MQTT compatible**: Works with existing MQTT infrastructure
 - **Format compatible**: Uses the same data formatting as live camera mode
